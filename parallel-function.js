@@ -2,7 +2,7 @@
 * @Author: colxi
 * @Date:   2018-04-23 06:35:19
 * @Last Modified by:   colxi
-* @Last Modified time: 2018-04-23 21:57:17
+* @Last Modified time: 2018-04-24 00:56:27
 */
 
 const ParallelFunction = (function(){
@@ -15,12 +15,13 @@ const ParallelFunction = (function(){
     }
 
     // private WORKER ID counter
-    let __identifierCounter__ = 0;
+    let __identifierCounter__ = 1;
 
-    return function(func, onMessageHandler = function(){} , __DEBUG__ = true){
+    return function(func, onMessageHandler = function(){} , __DEBUG__ = false){
         // constructor must be calld using 'new'
         if( !(this instanceof ParallelFunction) ) throw new Error('Calling ParallelFunction constructor without new is forbidden');
 
+        // filter arguments
         if(typeof func !== 'function') throw new Error('First argument must be a function.');
         if(typeof onMessageHandler !== 'function') throw new Error('If Second argument is setted, it must be a function.');
 
@@ -29,16 +30,16 @@ const ParallelFunction = (function(){
             else return false;
         };
 
-
-
+        // current instance id
+        let __INSTANCE_ID__ = __identifierCounter__++;
+        // current worker reference
+        let __WORKER__;
         // internal counter, used to assign an ID to each message send to
         // the worker, to properly handle the responses
-        let __UID__ = 0;
+        let __CALL_ID__ = 0;
         // object containing all the RESOLVE references, required to
         // return the control after each worker call is completed.
         let __RESOLVE__ = [];
-
-        let __WORKER__;
 
         // -----------------------------------------------------------------
         // GENERATE THE WORKER
@@ -65,47 +66,54 @@ const ParallelFunction = (function(){
         // ones, or redrect the custom messages to he provided handler
         let _ParallelFunction = function(...args){
             if(__WORKER__ === null) throw new Error('This ParallelFunction instance does not exist anymore.');
-
-            __UID__++;
-            debug('>>', '#'+__UID__, args);
-            return new Promise( ( resolve )=>{
-                __RESOLVE__[__UID__] = resolve;
+            // increase call counter
+            __CALL_ID__++;
+            debug('[WORKER-'+ __INSTANCE_ID__ + '] >>', '#'+__CALL_ID__, args);
+            return new Promise( resolve =>{
+                // store the resolve function
+                __RESOLVE__[__CALL_ID__] = resolve;
+                // send the message
                 __WORKER__.postMessage({
                     __parallel_function__ : true,
-                    id:__UID__ ,
+                    id:__CALL_ID__,
                     data : args
                 });
             });
         };
         _ParallelFunction.onMessage = onMessageHandler;
+        _ParallelFunction.id = __INSTANCE_ID__;
         _ParallelFunction.postMessage = function(...args){
             if(__WORKER__ === null) throw new Error('This ParallelFunction instance does not exist anymore.');
-
             return __WORKER__.postMessage(...args);
         };
         _ParallelFunction.terminate = function(){
             if(__WORKER__ === null) return false;
 
             __WORKER__.terminate();
-            __WORKER__ = null;
+            _ParallelFunction.postMessage = null;
+            _ParallelFunction.id          = null;
+            _ParallelFunction.onMessage   = null;
+            _ParallelFunction             = null;
 
-            _ParallelFunction = null;
-
+            __WORKER__  = null;
             __RESOLVE__ = null;
-            __UID__ = null;
+            __CALL_ID__ = null;
             return true;
         };
         _ParallelFunction.destroy = _ParallelFunction.terminate;
 
         // HANDLED return signals
         function onMessage(m){
-            if(__WORKER__ === null) return false;
+            if(__WORKER__ === null){
+                console.warn('Message recieved, but ParallelFunction instance does not exist anymore. Discarding.');
+                return false;
+            }
 
             const msg = m.data;
             // if message is an object and contains the private signature
             // proccess as an internal library signal
             if( typeof msg === 'object' && msg.hasOwnProperty('__parallel_function__') ){
-                debug('<< #'+ msg.id, msg.data);
+                debug('[WORKER-'+__INSTANCE_ID__ + '] << #'+ msg.id, msg.data);
                 // resolve the promise returning the result
                 // and clear the promise reference
                 __RESOLVE__[ msg.id ]( msg.data );

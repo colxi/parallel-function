@@ -21,13 +21,15 @@
 ## Syntax 
 
 
-> let myParallelFunction = new ParallelFunction( myFunction [ ,onMessageHandler ] );
+> let myParallelFunction = new ParallelFunction( myFunction [ , onMessageHandler , debugFlag ] );
 
 #### Parameters
-- **myFunction**  *function,required*
+- **myFunction**  *function,required* :
     Function to be executed in the worker
-- **onMessageHandler** *function*
+- **onMessageHandler** *function* :
     Function to handle the messages sent from the worker using postMessage
+- **debugFlag** *boolean* :
+    If set to true, will output in te cinsole each call and response values
 
 ## Return
 The ParallelFunction Constructor returns an interface function, to perform the async calls. Each call will return a Promise :
@@ -38,7 +40,7 @@ A method for destroying the instance :
 
 > myParallelFunction.**destroy()**;
 
-And it also provides some methods to perform some Worker related tasks, wich behave as the starndard describes. For more infomation about them, check the [ Mozilla documentation](https://developer.mozilla.org/en-US/docs/Web/API/Worker)
+And it also provides some methods to perform some Worker related tasks, wich behave as the starndard describes. For more infomation about them, check the [Mozilla documentation](https://developer.mozilla.org/en-US/docs/Web/API/Worker)
 
 > myParallelFunction.**postMessage( message, transferList )**;
 > 
@@ -107,23 +109,21 @@ When a call is returned, it resolves the Promise associated with the call ID.
 - **Your Parallel Function doesn't run in the same scope where  was declared , but in an isolate scope inside a worker**, this means, it cannot reach any variable declared in the main thread. However has acces to all the methods of the [Web Worker API](https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope)
 
 - Only those values wich can be handled by the  [Structure Clone Algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm) are candidates to be passed/retrieved through the function calls.
-
-
-> All primitive types	- **Except symbols**
-> Boolean object	 
-> String object	 
-> Date	 
-> RegExp	- **The lastIndex field is not preserved**
-> Blob	 
-> File	 
-> FileList	 
-> ArrayBuffer	 
-> ArrayBufferView	- **All typed arrays (like Int32Array etc.)**
-> ImageData	 
-> Array	 
-> Object	- **Just plain objects (e.g. from object literals)**
-> Map	 
-> Set	 
+-- All primitive types, *Except symbols*
+-- Boolean object	 
+-- String object	 
+-- Date	 
+-- RegExp, *The lastIndex field is not preserved*
+-- Blob	 
+-- File	 
+-- FileList	 
+-- ArrayBuffer	 
+-- ArrayBufferView, *All typed arrays (like Int32Array etc.)*
+-- ImageData	 
+-- Array	 
+-- Object, *Just plain objects (e.g. from object literals)*
+-- Map	 
+-- Set	 
 
 - Because the worker allows natively **powerfull interactions throught the standard Messages**, this library lets you use them, in order to unlease the real power of workers (and make use of trafereable objects, sharedArrayBuffers...)
 
