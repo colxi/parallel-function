@@ -6,13 +6,13 @@
 **Create a new thread with your function**, and keep it ready to be called as many times you need, **asynchronously** in the background, **without blocking your main thread event loop**.
 
 #### Features 
-[x] Generate/Destroy threaded functions on demmand.
-[x] Execute your functions as a regular async function call.
-[x] Unlsease the power of multithreading keeping your code clean.
-[x] Compatible with Promise.race() & Promise.all()
-[x] Availability to use the power of Transfereable Objects and sharedArrayBuffers.
-[x] Browser support : Firefox 59,  Edge 41, Chrome 65
-[ ] Node support... ¿Soon?
+- [x] Generate/Destroy threaded functions on demmand.
+- [x] Execute your functions as a regular async function call.
+- [x] Unlsease the power of multithreading keeping your code clean.
+- [x] Compatible with Promise.race() & Promise.all()
+- [x] Availability to use the power of Transfereable Objects and sharedArrayBuffers.
+- [x] Browser support : Firefox 59,  Edge 41, Chrome 65
+- [ ] Node support... ¿Soon?
 
 > **Note : Until Workers are available in Node, this library is exclusive for Browsers.**
 
