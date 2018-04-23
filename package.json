@@ -1,15 +1,22 @@
 {
     "name": "parallel-function",
-    "description": "Perform async calls to an automatically 'worker-wrapped' function",
-    "version": "0.0.1",
+    "description": "Multithreading. Perform async calls to an automatically 'worker-wrapped' function",
+    "version": "1.0.1",
     "keywords": [
-
+        "worker function",
+        "function thread",
+        "threaded function",
+        "parallel function",
+        "parallel execution",
+        "multi thread",
+        "thread",
+        "multithreading"
     ],
     "author": "colxi",
     "license": "GPL",
     "repository": {
         "type": "git",
-        "url": "https://github.com/colxi/"
+        "url": "https://github.com/colxi/parallel-function"
     },
     "dependencies": {}
 }
