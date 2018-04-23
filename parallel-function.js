@@ -2,11 +2,17 @@
 * @Author: colxi
 * @Date:   2018-04-23 06:35:19
 * @Last Modified by:   colxi
-* @Last Modified time: 2018-04-23 17:51:23
+* @Last Modified time: 2018-04-23 21:57:17
 */
 
 const ParallelFunction = (function(){
     'use strict';
+
+    if( typeof Worker !== 'function' ||
+        typeof Blob !== 'function'   ||
+        typeof Promise !== 'function'){
+        throw new Error('Aborted: Some o the required APIS are not available (WebWorkers, Blobs,Promises)' );
+    }
 
     // private WORKER ID counter
     let __identifierCounter__ = 0;
@@ -15,8 +21,8 @@ const ParallelFunction = (function(){
         // constructor must be calld using 'new'
         if( !(this instanceof ParallelFunction) ) throw new Error('Calling ParallelFunction constructor without new is forbidden');
 
-        if(typeof func !== 'function') throw new Error('First argument must be a function.')
-        if(typeof onMessageHandler !== 'function') throw new Error('If Second argument is setted, it must be a function.')
+        if(typeof func !== 'function') throw new Error('First argument must be a function.');
+        if(typeof onMessageHandler !== 'function') throw new Error('If Second argument is setted, it must be a function.');
 
         const debug = function(...args){
             if( __DEBUG__ ) return console.log(...args);
@@ -32,6 +38,8 @@ const ParallelFunction = (function(){
         // return the control after each worker call is completed.
         let __RESOLVE__ = [];
 
+        let __WORKER__;
+
         // -----------------------------------------------------------------
         // GENERATE THE WORKER
         // -----------------------------------------------------------------
@@ -39,17 +47,16 @@ const ParallelFunction = (function(){
         // to load the provided function and route and handle each call...
 
         // covert the function into something transfereable...
-        const funcEncoded = JSON.stringify( func.toString() );
+        let funcEncoded = JSON.stringify( func.toString() );
         // Convert the communication layer code, into a blob, and attach
         // the stringified function
-        const blob = new Blob([ '(' + loader.toString() + ')("'+func.name+'",'+funcEncoded+','+__DEBUG__+');']);
+        let blob = new Blob([ '(' + loader.toString() + ')("'+func.name+'",'+funcEncoded+','+__DEBUG__+');']);
         // convert the blob into a Object Url
-        const blobURL = URL.createObjectURL( blob, {
+        let blobURL = URL.createObjectURL( blob, {
             type: 'application/javascript; charset=utf-8'
         });
         // generate the worker!
-        const workerReference = new Worker( blobURL );
-
+        __WORKER__ = new Worker( blobURL );
 
         // -----------------------------------------------------------------
         // PROCESS SIGNAL (on message evenet handler)
@@ -57,11 +64,13 @@ const ParallelFunction = (function(){
         // handle the recieved messages from worker, and proces the internal
         // ones, or redrect the custom messages to he provided handler
         let _ParallelFunction = function(...args){
+            if(__WORKER__ === null) throw new Error('This ParallelFunction instance does not exist anymore.');
+
             __UID__++;
             debug('>>', '#'+__UID__, args);
             return new Promise( ( resolve )=>{
                 __RESOLVE__[__UID__] = resolve;
-                workerReference.postMessage({
+                __WORKER__.postMessage({
                     __parallel_function__ : true,
                     id:__UID__ ,
                     data : args
@@ -69,10 +78,19 @@ const ParallelFunction = (function(){
             });
         };
         _ParallelFunction.onMessage = onMessageHandler;
-        _ParallelFunction.postMessage = function(...args){ return workerReference.postMessage(...args) };
+        _ParallelFunction.postMessage = function(...args){
+            if(__WORKER__ === null) throw new Error('This ParallelFunction instance does not exist anymore.');
+
+            return __WORKER__.postMessage(...args);
+        };
         _ParallelFunction.terminate = function(){
-            workerReference.terminate();
+            if(__WORKER__ === null) return false;
+
+            __WORKER__.terminate();
+            __WORKER__ = null;
+
             _ParallelFunction = null;
+
             __RESOLVE__ = null;
             __UID__ = null;
             return true;
@@ -81,6 +99,8 @@ const ParallelFunction = (function(){
 
         // HANDLED return signals
         function onMessage(m){
+            if(__WORKER__ === null) return false;
+
             const msg = m.data;
             // if message is an object and contains the private signature
             // proccess as an internal library signal
@@ -96,7 +116,9 @@ const ParallelFunction = (function(){
         }
 
         // Set incoming messages handler
-        workerReference.addEventListener('message', onMessage);
+        __WORKER__.addEventListener('message', onMessage);
+
+        func, onMessageHandler, funcEncoded, blob, blobURL = null;
 
         return _ParallelFunction;
     };
@@ -107,7 +129,7 @@ const ParallelFunction = (function(){
 /*******************************************************************************
  *
  *
- * INJECTED WORKER EXPORTS HANDLER
+ * INJECTED WORKER HANDLER
  * -------------------------------
  *
  *

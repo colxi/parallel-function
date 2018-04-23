@@ -3,7 +3,9 @@
 ![](https://img.shields.io/badge/Javascript-ES6-orange.svg)
 ![](https://img.shields.io/badge/powered-webWorkers-blue.svg)
 
-Create a new thread with your function, ready to be called as many times you need, asynchronously in the background, without blocking your main thread execution loop.
+Create a new thread with your function, ready to be called as many times you need, asynchronously in the background, without blocking your main thread event loop.
+
+> **Note : Until Workers are available in Node, this library is exclusive for Browsers.**
 
 
 
@@ -95,3 +97,14 @@ When a call is returned, it resolves thePpromise associated with the call Id.
 > Set	 
 
 - Because the worker allows natively **powerfull interactions throught the standard Messages**, this library lets you use them, in order to unlease the real power of workers (and make use of trafereable objects, sharedArrayBuffers...)
+
+
+## Node support
+Until Workers API is available in Node, this library is exclusive for Browsers.
+Threads to track:
+
+Worker support
+https://github.com/nodejs/node/issues/13143
+
+Implement createObjectURL/Blob from File API
+https://github.com/nodejs/node/issues/16167
