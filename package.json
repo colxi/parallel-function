@@ -1,0 +1,15 @@
+{
+    "name": "parallel-function",
+    "description": "Perform async calls to an automatically 'worker-wrapped' function",
+    "version": "0.0.1",
+    "keywords": [
+
+    ],
+    "author": "colxi",
+    "license": "GPL",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/colxi/"
+    },
+    "dependencies": {}
+}
