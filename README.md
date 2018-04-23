@@ -1,11 +1,11 @@
-# ParallelFunction 
+# ParallelFunction
 ![](https://img.shields.io/badge/cdn-cdn.rawgit-green.svg)
 ![](https://img.shields.io/badge/Javascript-ES6-orange.svg)
 ![](https://img.shields.io/badge/powered-webWorkers-blue.svg)
 
 **Create a new thread with your function**, and keep it ready to be called as many times you need, **asynchronously** in the background, **without blocking your main thread event loop**.
 
-#### Features 
+#### Features
 - [x] Generate/Destroy threaded functions on demmand.
 - [x] Execute your functions as a regular async function call.
 - [x] Unlsease the power of multithreading keeping your code clean.
@@ -18,7 +18,7 @@
 
 
 
-## Syntax 
+## Syntax
 
 
 > let myParallelFunction = new ParallelFunction( myFunction [ , onMessageHandler , debugFlag ] );
@@ -36,24 +36,26 @@ The ParallelFunction Constructor returns an interface function, to perform the a
 
 > myParallelFunction( ...args );
 
-A method for destroying the instance :
+A property for identifying and a method to destroy the thread :
+
+> myParallelFunction.**id**;
 
 > myParallelFunction.**destroy()**;
 
-And it also provides some methods to perform some Worker related tasks, wich behave as the starndard describes. For more infomation about them, check the [Mozilla documentation](https://developer.mozilla.org/en-US/docs/Web/API/Worker)
+And it also provides some methods to perform some Worker related tasks, wich behave as the starndard specs describe. For more infomation about them, check the [Mozilla documentation](https://developer.mozilla.org/en-US/docs/Web/API/Worker)
 
 > myParallelFunction.**postMessage( message, transferList )**;
-> 
+>
 > myParallelFunction.**onMessage( handler )**;
-> 
+>
 > myParallelFunction.**terminate()**;
 
 
-## Usage 
+## Usage
 
 A minimal example, to interact with a ParallelFunction :
 ```javascript
-    // Generate a ParallelFunction to calculate Pi,  
+    // Generate a ParallelFunction to calculate Pi,
     // with customizable precision. The bigger
     // is n, the  longuer is going to take
     let calculatePi = new ParallelFunction( function(n){
@@ -65,7 +67,7 @@ A minimal example, to interact with a ParallelFunction :
     // precision , and in consecuence calculation speeds
     calculatePi(1000000).then( r=> console.log(r) );
     calculatePi(1000000000).then( r=> console.log(r) );
-    
+
     // if you preffer you can use the Promise await keyword
     // insid async functions
     (async function(){
@@ -73,11 +75,8 @@ A minimal example, to interact with a ParallelFunction :
         // destroy the ParallelFunction
         calculatePi.destroy();
     })()
-   
-    
-
-
 ```
+
 ## Installation
 Use any of the following distribution channels:
 - Global **CDN**
@@ -86,7 +85,7 @@ Use any of the following distribution channels:
 ```
 
 - Use **npm**
-``` 
+```
 $ npm -i parallel-function
 ```
 
@@ -95,12 +94,12 @@ $ npm -i parallel-function
 https://github.com/colxi/parallel-function
 ```
 
-## How it works 
+## How it works
 The mechanism is pretty simple and straight forward.
-> ParallelFunction = **Blobs + Workers + Promises** 
+> ParallelFunction = **Blobs + Workers + Promises**
 
 The library injects into a new Worker, a Blob containing the code of the communication layer, and the provided function, and handles each function call adding it to the messages queue, using a unique index ID.
-When a call is returned, it resolves the Promise associated with the call ID. 
+When a call is returned, it resolves the Promise associated with the call ID.
 
 
 ## Notes :
@@ -109,27 +108,14 @@ When a call is returned, it resolves the Promise associated with the call ID.
 - **Your Parallel Function doesn't run in the same scope where  was declared , but in an isolate scope inside a worker**, this means, it cannot reach any variable declared in the main thread. However has acces to all the methods of the [Web Worker API](https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope)
 
 - Only those values wich can be handled by the  [Structure Clone Algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm) are candidates to be passed/retrieved through the function calls.
--- All primitive types, *Except symbols*
--- Boolean object	 
--- String object	 
--- Date	 
--- RegExp, *The lastIndex field is not preserved*
--- Blob	 
--- File	 
--- FileList	 
--- ArrayBuffer	 
--- ArrayBufferView, *All typed arrays (like Int32Array etc.)*
--- ImageData	 
--- Array	 
--- Object, *Just plain objects (e.g. from object literals)*
--- Map	 
--- Set	 
+
+All primitive types, *Except symbols* -- Boolean object -- String object -- Date -- RegExp, *The lastIndex field is not preserved* -- Blob -- File -- FileList -- ArrayBuffer -- ArrayBufferView, *All typed arrays (like Int32Array etc.)* -- ImageData -- Array -- Object, *Just plain objects (e.g. from object literals)* -- Map -- Set
 
 - Because the worker allows natively **powerfull interactions throught the standard Messages**, this library lets you use them, in order to unlease the real power of workers (and make use of trafereable objects, sharedArrayBuffers...)
 
 
 ## Node support
-Until Workers API is available in Node, this library is exclusive for Browsers.
+Until Workers API isn't available in Node, this library is exclusive for Browsers.
 Threads to track:
 
 Worker support
