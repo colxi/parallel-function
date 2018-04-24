@@ -5,14 +5,14 @@
 ![](https://img.shields.io/badge/Javascript-ES6-orange.svg)
 ![](https://img.shields.io/badge/powered-webWorkers-blue.svg)
 
-**Create a new thread with your function**, and keep it ready to be called as many times you need, **asynchronously** in the background, **without blocking your main thread event loop**.
+**Create a new thread with your function**, and keep it ready to be called as many times as you need, **asynchronously** in the background, **without blocking your main thread event loop**.
 
 #### Features
 - [x] Generate/Destroy threaded functions on demmand.
 - [x] Execute your functions as a regular async function call.
-- [x] Unlsease the power of multithreading keeping your code clean.
+- [x] Unlease the power of multithreading keeping your code clean.
 - [x] Compatible with Promise.race() & Promise.all()
-- [x] Availability to use the power of Transfereable Objects and sharedArrayBuffers.
+- [x] Availability to use Transfereable Objects and sharedArrayBuffers.
 - [x] Browser support : Firefox 59,  Edge 41, Chrome 65
 - [ ] Node support... ¿Soon? 
 
@@ -23,29 +23,27 @@
 
 > let myParallelFunction = new ParallelFunction( myFunction );
 
-#### Parameters
-- **myFunction**  *function,required* :
-    Function to be executed in the worker. It will automatically become an async function.
+- **myFunction**  *function,required* : Function to be injected in the worker. If it has no name defined, it will be declared inside the worker as self._parallelFunction, otherwise the name will be respected. Async functions are accepted. **Read the section Details to find out the allowed types to be returned**.
 
 
-#### Constructor Returns
+## Usage
 The ParallelFunction Constructor returns an interface-function, wich handles the async calls to your function.
 
 > async myParallelFunction( ...args ); // ...will execute your function
 
-It's a regular function, but contains some suga, like a method to Destroy the thread, when is not anymore required.
+Your reference to the created ParallelFunction, contains some usefull methods, like a method to Destroy the thread, when is not anymore required.
 
 > myParallelFunction.**destroy()**;
 
-Finally provides some methods to perform advanced implementations, combining the simple interface provided by ParallelFunction and the native Worker API. This methods, expose the worker API. For more infomation about them, check the [Mozilla documentation](https://developer.mozilla.org/en-US/docs/Web/API/Worker)
+As well provides some methods to perform advanced implementations, combining the simple interface of the library and the native Worker API. This methods, expose the worker API. For more infomation about them, check the [Mozilla documentation](https://developer.mozilla.org/en-US/docs/Web/API/Worker)
 
 > myParallelFunction.**postMessage( message, transferList )**;
 >
-> myParallelFunction.**onMessage( handler )**;
+> myParallelFunction.**onMessage( handlerFunction )**;
 >
 
 
-## Usage
+## Example
 
 A minimal example, to interact with a ParallelFunction :
 ```javascript
@@ -73,9 +71,9 @@ A minimal example, to interact with a ParallelFunction :
 
 ## Installation
 Use any of the following distribution channels:
-- Global **CDN**
+- Embeed from a Global **CDN**
 ```
-<script src="https://cdn.rawgit.com/colxi/parallel-function/814e4698/parallel-function.js"></script>
+<script src="https://cdn.rawgit.com/colxi/parallel-function/a8abdc44/parallel-function.min.js"></script>
 ```
 
 - Use **npm**
