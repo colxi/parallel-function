@@ -1,3 +1,5 @@
+![](https://cdn.rawgit.com/colxi/parallel-function/f693ac1b/logo.png)
+
 # ParallelFunction
 ![](https://img.shields.io/badge/cdn-cdn.rawgit-green.svg)
 ![](https://img.shields.io/badge/Javascript-ES6-orange.svg)
@@ -12,43 +14,35 @@
 - [x] Compatible with Promise.race() & Promise.all()
 - [x] Availability to use the power of Transfereable Objects and sharedArrayBuffers.
 - [x] Browser support : Firefox 59,  Edge 41, Chrome 65
-- [ ] Node support... ¿Soon?
-
-> **Note : Until Workers are available in Node, this library is exclusive for Browsers.**
+- [ ] Node support... ¿Soon? 
 
 
 
 ## Syntax
 
 
-> let myParallelFunction = new ParallelFunction( myFunction [ , onMessageHandler , debugFlag ] );
+> let myParallelFunction = new ParallelFunction( myFunction );
 
 #### Parameters
 - **myFunction**  *function,required* :
-    Function to be executed in the worker
-- **onMessageHandler** *function* :
-    Function to handle the messages sent from the worker using postMessage
-- **debugFlag** *boolean* :
-    If set to true, will output in te cinsole each call and response values
+    Function to be executed in the worker. It will automatically become an async function.
 
-## Return
-The ParallelFunction Constructor returns an interface function, to perform the async calls. Each call will return a Promise :
 
-> myParallelFunction( ...args );
+#### Constructor Returns
+The ParallelFunction Constructor returns an interface-function, wich handles the async calls to your function.
 
-A property for identifying and a method to destroy the thread :
+> async myParallelFunction( ...args ); // ...will execute your function
 
-> myParallelFunction.**id**;
+It's a regular function, but contains some suga, like a method to Destroy the thread, when is not anymore required.
 
 > myParallelFunction.**destroy()**;
 
-And it also provides some methods to perform some Worker related tasks, wich behave as the starndard specs describe. For more infomation about them, check the [Mozilla documentation](https://developer.mozilla.org/en-US/docs/Web/API/Worker)
+Finally provides some methods to perform advanced implementations, combining the simple interface provided by ParallelFunction and the native Worker API. This methods, expose the worker API. For more infomation about them, check the [Mozilla documentation](https://developer.mozilla.org/en-US/docs/Web/API/Worker)
 
 > myParallelFunction.**postMessage( message, transferList )**;
 >
 > myParallelFunction.**onMessage( handler )**;
 >
-> myParallelFunction.**terminate()**;
 
 
 ## Usage
@@ -63,16 +57,16 @@ A minimal example, to interact with a ParallelFunction :
         for(let i=1; i<=n; i+=4) v += ( 1/i ) - ( 1/(i+2) );
         return 4*v;
     });
-    // perform the calculation in the background, with different
-    // precision , and in consecuence calculation speeds
+    
+    // perform the calculation, with different precisions
     calculatePi(1000000).then( r=> console.log(r) );
     calculatePi(1000000000).then( r=> console.log(r) );
 
-    // if you preffer you can use the Promise await keyword
-    // insid async functions
+    // use the Promise await keyword inside async functions
     (async function(){
-	    console.log( await calculatePi(1000000000) );
-        // destroy the ParallelFunction
+        let pi = await calculatePi(1000000000);
+	    console.log( pi );
+        // done! destroy the reference
         calculatePi.destroy();
     })()
 ```
@@ -94,22 +88,15 @@ $ npm -i parallel-function
 https://github.com/colxi/parallel-function
 ```
 
-## How it works
-The mechanism is pretty simple and straight forward.
-> ParallelFunction = **Blobs + Workers + Promises**
 
-The library injects into a new Worker, a Blob containing the code of the communication layer, and the provided function, and handles each function call adding it to the messages queue, using a unique index ID.
-When a call is returned, it resolves the Promise associated with the call ID.
-
-
-## Notes :
+## Details
 - Because each request needs to be messaged to the worker, and its result, messaged back, all interactions with the function are **ASYNCHRONOUS**.
 
 - **Your Parallel Function doesn't run in the same scope where  was declared , but in an isolate scope inside a worker**, this means, it cannot reach any variable declared in the main thread. However has acces to all the methods of the [Web Worker API](https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope)
 
 - Only those values wich can be handled by the  [Structure Clone Algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm) are candidates to be passed/retrieved through the function calls.
 
-All primitive types, *Except symbols* -- Boolean object -- String object -- Date -- RegExp, *The lastIndex field is not preserved* -- Blob -- File -- FileList -- ArrayBuffer -- ArrayBufferView, *All typed arrays (like Int32Array etc.)* -- ImageData -- Array -- Object, *Just plain objects (e.g. from object literals)* -- Map -- Set
+> All primitive types, *Except symbols* -- Boolean object -- String object -- Date -- RegExp, *The lastIndex field is not preserved* -- Blob -- File -- FileList -- ArrayBuffer -- ArrayBufferView, *All typed arrays (like Int32Array etc.)* -- ImageData -- Array -- Object, *Just plain objects (e.g. from object literals)* -- Map -- Set
 
 - Because the worker allows natively **powerfull interactions throught the standard Messages**, this library lets you use them, in order to unlease the real power of workers (and make use of trafereable objects, sharedArrayBuffers...)
 
@@ -123,3 +110,11 @@ https://github.com/nodejs/node/issues/13143
 
 Implement createObjectURL/Blob from File API
 https://github.com/nodejs/node/issues/16167
+
+
+## Implementation overview
+The mechanism is pretty simple and straight forward.
+> ParallelFunction = **Blobs + Workers + Promises**
+
+The library injects into a new Worker, a Blob containing the code of the communication layer, and the provided function, and handles each function call adding it to the messages queue, using a unique index ID.
+When a call is returned, it resolves the Promise associated with the call ID.

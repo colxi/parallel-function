@@ -1,7 +1,7 @@
 {
     "name": "parallel-function",
     "description": "Multithreading. Perform async calls to an automatically 'worker-wrapped' function",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "keywords": [
         "worker function",
         "function thread",
